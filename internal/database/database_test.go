@@ -26,3 +26,15 @@ func TestQueryUser(t *testing.T) {
 	}
 	fmt.Println(userInfo)
 }
+
+func TestQueryNodeInfo(t *testing.T) {
+	err := mysqlConf.GetDB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	userInfo, err := mysqlConf.GetNodeInfo(2)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(userInfo)
+}
