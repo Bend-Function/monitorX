@@ -8,7 +8,7 @@ import (
 func UserInfo(requestUser string) *ResponseBody {
 	responseBody := ResponseBody{code: http.StatusOK}
 	mysqlConf := database.GetConfig()
-	userInfo, err := mysqlConf.GetUserByName(requestUser)
+	userInfo, err := mysqlConf.GetUser(requestUser)
 	if err != nil {
 		responseBody.code = http.StatusBadRequest
 		responseBody.Msg = err.Error()

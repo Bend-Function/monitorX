@@ -20,7 +20,7 @@ func TestQueryUser(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	userInfo, err := mysqlConf.GetUserByName("t2")
+	userInfo, err := mysqlConf.GetUser("t2")
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -57,7 +57,7 @@ func jwtInit(timeout int) {
 			}
 
 			mysql := database.GetConfig()
-			user, err := mysql.GetUserByName(userID)
+			user, err := mysql.GetUser(userID)
 			if err != nil {
 				return nil, jwt.ErrFailedAuthentication
 			}

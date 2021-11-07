@@ -38,13 +38,13 @@ func (mysql *MysqlConfig) GetNodeInfo(nodeID uint) (nodeInfo *NodeInfo, err erro
 		}
 	}
 	row := mysql.MysqlConn.QueryRow(fmt.Sprintf("SELECT * FROM node_info WHERE BINARY id='%v'", nodeID))
-	if err = row.Scan(&nodeInfo.ID, &nodeInfo.NodeName, &nodeInfo.Password, &nodeInfo.GroupID, &nodeInfo.OwnedUserID, &nodeInfo.UpdateFrequency, &nodeInfo.NodeSystem, &nodeInfo.CoreVersion, &nodeInfo.StartupTime, &nodeInfo.CpuType, &nodeInfo.MemorySize, &nodeInfo.DiskSize, &nodeInfo.NetUpSum, &nodeInfo.NetDownSum, &nodeInfo.IsExpired, &nodeInfo.CreationTime, &nodeInfo.UpdateTime); err != nil {
+	if err = row.Scan(&nodeInfo.ID, &nodeInfo.NodeName, &nodeInfo.Password, &nodeInfo.GroupID, &nodeInfo.OwnedUserID, &nodeInfo.UpdateFrequency, &nodeInfo.NodeSystem, &nodeInfo.CoreVersion, &nodeInfo.StartupTime, &nodeInfo.CpuType, &nodeInfo.MemorySize, &nodeInfo.DiskSize, &nodeInfo.NetworkUpSum, &nodeInfo.NetworkDownSum, &nodeInfo.IsInfoExpired, &nodeInfo.CreatTime, &nodeInfo.UpdateTime); err != nil {
 		return nil, err
 	}
 	return nodeInfo, nil
 }
 
-func (mysql *MysqlConfig) GetUserByName(name string) (userInfo *User, err error) {
+func (mysql *MysqlConfig) GetUser(name string) (userInfo *User, err error) {
 	userInfo = new(User)
 	if mysql.MysqlConn == nil {
 		err = mysql.GetDB()
@@ -52,10 +52,11 @@ func (mysql *MysqlConfig) GetUserByName(name string) (userInfo *User, err error)
 			return nil, err
 		}
 	}
-	//userInfo, err = queryUser(mysql.MysqlConn, fmt.Sprintf("SELECT id, user_name, passwd, email, balance, group_id FROM user WHERE BINARY user_name='%s'", name) )
-	row := mysql.MysqlConn.QueryRow(fmt.Sprintf("SELECT id, user_name, passwd, email, balance, group_id FROM user WHERE BINARY user_name='%s'", name))
-	if err = row.Scan(&userInfo.ID, &userInfo.Username, &userInfo.Password, &userInfo.Email, &userInfo.Balance, &userInfo.GroupID); err != nil {
+
+	row := mysql.MysqlConn.QueryRow(fmt.Sprintf("SELECT * FROM user WHERE BINARY user_name='%s'", name))
+	if err = row.Scan(&userInfo.ID, &userInfo.UserName, &userInfo.Password, &userInfo.Email, &userInfo.Balance, &userInfo.GroupID, &userInfo.CreateTime, &userInfo.UpdateTime); err != nil {
 		return nil, err
 	}
+
 	return userInfo, nil
 }
