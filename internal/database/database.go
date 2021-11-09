@@ -1,27 +1,24 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
-	mysqlDriver "github.com/go-sql-driver/mysql"
-	"io/ioutil"
-	"log"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var (
 	Config = &MysqlConfig{}
 )
 
-func (mysql *MysqlConfig) GetDB() error {
-	// 屏蔽mysql驱动包的日志输出
-	mysqlDriver.SetLogger(log.New(ioutil.Discard, "", 0))
-	conn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", mysql.Username, mysql.Password, mysql.ServerAddr, mysql.ServerPort, mysql.Database)
-	db, err := sql.Open("mysql", conn)
+func (mysqlConf *MysqlConfig) GetDB() error {
+
+	conn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&charset=utf8mb4&loc=Local", mysqlConf.Username, mysqlConf.Password, mysqlConf.ServerAddr, mysqlConf.ServerPort, mysqlConf.Database)
+	db, err := gorm.Open(mysql.Open(conn))
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
-	mysql.MysqlConn = db
+	mysqlConf.MysqlConn = db
 	return nil
 }
 
@@ -29,56 +26,41 @@ func GetConfig() *MysqlConfig {
 	return Config
 }
 
-func (mysql *MysqlConfig) GetNodeInfo(nodeID uint) (nodeInfo *NodeInfo, err error) {
+func (mysqlConf *MysqlConfig) GetNodeInfo(nodeID uint) (nodeInfo *NodeInfo, err error) {
 	nodeInfo = new(NodeInfo)
-	if mysql.MysqlConn == nil {
-		err = mysql.GetDB()
+	if mysqlConf.MysqlConn == nil {
+		err = mysqlConf.GetDB()
 		if err != nil {
 			return nil, err
 		}
 	}
-	row := mysql.MysqlConn.QueryRow(fmt.Sprintf("SELECT * FROM node_info WHERE BINARY id='%v'", nodeID))
-	if err = row.Scan(&nodeInfo.ID, &nodeInfo.NodeName, &nodeInfo.Password, &nodeInfo.GroupID, &nodeInfo.OwnedUserID, &nodeInfo.UpdateFrequency, &nodeInfo.NodeSystem, &nodeInfo.CoreVersion, &nodeInfo.StartupTime, &nodeInfo.CpuType, &nodeInfo.MemorySize, &nodeInfo.DiskSize, &nodeInfo.NetworkUpSum, &nodeInfo.NetworkDownSum, &nodeInfo.IsInfoExpired, &nodeInfo.CreatTime, &nodeInfo.UpdateTime); err != nil {
-		return nil, err
-	}
+	mysqlConf.MysqlConn.Find(&nodeInfo, "id=?", nodeID)
 	return nodeInfo, nil
 }
 
-func (mysql *MysqlConfig) GetUserNode(name string) (nodeList []*NodeInfo, err error) {
-	if mysql.MysqlConn == nil {
-		err = mysql.GetDB()
+func (mysqlConf *MysqlConfig) GetUserNode(name string) (nodeList *[]NodeInfo, err error) {
+	nodeList = new([]NodeInfo)
+	if mysqlConf.MysqlConn == nil {
+		err = mysqlConf.GetDB()
 		if err != nil {
 			return nil, err
 		}
 	}
-	rows, err := mysql.MysqlConn.Query(fmt.Sprintf("SELECT node_info.u* FROM node_info INNER JOIN `user` ON node_info.owned_user_id = `user`.id WHERE `user`.user_name = \"%v\"", name))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		nodeInfo := NodeInfo{}
-		if err := rows.Scan(&nodeInfo.ID, &nodeInfo.NodeName, &nodeInfo.Password, &nodeInfo.GroupID, &nodeInfo.OwnedUserID, &nodeInfo.UpdateFrequency, &nodeInfo.NodeSystem, &nodeInfo.CoreVersion, &nodeInfo.StartupTime, &nodeInfo.CpuType, &nodeInfo.MemorySize, &nodeInfo.DiskSize, &nodeInfo.NetworkUpSum, &nodeInfo.NetworkDownSum, &nodeInfo.IsInfoExpired, &nodeInfo.CreatTime, &nodeInfo.UpdateTime); err != nil {
-			return nil, err
-		}
-		nodeList = append(nodeList, &nodeInfo)
-	}
+	mysqlConf.MysqlConn.Table("node_info").Select("*").Joins("INNER JOIN `user` ON node_info.owned_user_id = `user`.id WHERE `user`.user_name = ?", name).Scan(&nodeList)
+	// SELECT node_info.u* FROM node_info INNER JOIN `user` ON node_info.owned_user_id = `user`.id WHERE `user`.user_name = name
+
 	return nodeList, nil
 }
 
-func (mysql *MysqlConfig) GetUser(name string) (userInfo *User, err error) {
+func (mysqlConf *MysqlConfig) GetUser(name string) (userInfo *User, err error) {
 	userInfo = new(User)
-	if mysql.MysqlConn == nil {
-		err = mysql.GetDB()
+	if mysqlConf.MysqlConn == nil {
+		err = mysqlConf.GetDB()
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	row := mysql.MysqlConn.QueryRow(fmt.Sprintf("SELECT * FROM user WHERE BINARY user_name='%s'", name))
-	if err = row.Scan(&userInfo.ID, &userInfo.UserName, &userInfo.Password, &userInfo.Email, &userInfo.Balance, &userInfo.GroupID, &userInfo.CreateTime, &userInfo.UpdateTime); err != nil {
-		return nil, err
-	}
+	mysqlConf.MysqlConn.Find(&userInfo, "user_name=?", name)
 
 	return userInfo, nil
 }
