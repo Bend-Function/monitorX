@@ -8,6 +8,7 @@ import (
 	"monitorX/internal/database"
 	"monitorX/internal/web/controller"
 	"net/http"
+	"strconv"
 )
 
 func nodeRouter(router *gin.Engine) {
@@ -32,9 +33,17 @@ func userRouter(router *gin.Engine) {
 			requestUser := RequestUsername(c)
 			c.JSON(200, controller.UserInfo(requestUser))
 		})
-		user.GET("/node", func(c *gin.Context) {
+		user.GET("/node/list", func(c *gin.Context) {
 			requestUser := RequestUsername(c)
 			c.JSON(200, controller.UserNode(requestUser))
+		})
+		user.GET("/node/data/:id", func(c *gin.Context) {
+			requestUser := RequestUsername(c)
+			nodeID, err := strconv.Atoi(c.Param("id"))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, "id is not int")
+			}
+			c.JSON(200, controller.QueryNodeData(nodeID, requestUser))
 		})
 	}
 }

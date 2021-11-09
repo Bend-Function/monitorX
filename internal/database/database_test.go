@@ -90,3 +90,15 @@ func TestCheckNodePassword(t *testing.T) {
 	}
 	fmt.Println(status)
 }
+
+func TestQueryNodeData(t *testing.T) {
+	err := mysqlConf.GetDB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	nodeData, err := mysqlConf.GetNodeData(1)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(nodeData)
+}
