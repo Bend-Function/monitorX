@@ -105,7 +105,16 @@ func Auth(r *gin.Engine, timeout int) *jwt.GinJWTMiddleware {
 		fmt.Printf("NoRoute claims: %#v\n", claims)
 		c.JSON(404, gin.H{"code": 404, "message": "Page not found"})
 	})
-
+	r.GET("/auth/check", func(c *gin.Context) {
+		title := "66666"
+		c.JSON(200, gin.H{
+			"code":    200,
+			"message": "success",
+			"data": map[string]string{
+				"title": title,
+			},
+		})
+	})
 	r.POST("/auth/login", authMiddleware.LoginHandler)
 	authO := r.Group("/auth")
 	authO.Use(authMiddleware.MiddlewareFunc())

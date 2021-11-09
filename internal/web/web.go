@@ -12,12 +12,12 @@ func userRouter(router *gin.Engine) {
 	user := router.Group("/user")
 	{
 		user.GET("/info", func(c *gin.Context) {
-			requestUser := RequestUsername(c
+			requestUser := RequestUsername(c)
 			c.JSON(200, controller.UserInfo(requestUser))
 		})
 		user.GET("/node", func(c *gin.Context) {
 			requestUser := RequestUsername(c)
-			c.JSON(200, controller.UserInfo(requestUser))
+			c.JSON(200, controller.UserNode(requestUser))
 		})
 	}
 }

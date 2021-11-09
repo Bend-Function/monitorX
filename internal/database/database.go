@@ -44,6 +44,28 @@ func (mysql *MysqlConfig) GetNodeInfo(nodeID uint) (nodeInfo *NodeInfo, err erro
 	return nodeInfo, nil
 }
 
+func (mysql *MysqlConfig) GetUserNode(name string) (nodeList []*NodeInfo, err error) {
+	if mysql.MysqlConn == nil {
+		err = mysql.GetDB()
+		if err != nil {
+			return nil, err
+		}
+	}
+	rows, err := mysql.MysqlConn.Query(fmt.Sprintf("SELECT node_info.u* FROM node_info INNER JOIN `user` ON node_info.owned_user_id = `user`.id WHERE `user`.user_name = \"%v\"", name))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		nodeInfo := NodeInfo{}
+		if err := rows.Scan(&nodeInfo.ID, &nodeInfo.NodeName, &nodeInfo.Password, &nodeInfo.GroupID, &nodeInfo.OwnedUserID, &nodeInfo.UpdateFrequency, &nodeInfo.NodeSystem, &nodeInfo.CoreVersion, &nodeInfo.StartupTime, &nodeInfo.CpuType, &nodeInfo.MemorySize, &nodeInfo.DiskSize, &nodeInfo.NetworkUpSum, &nodeInfo.NetworkDownSum, &nodeInfo.IsInfoExpired, &nodeInfo.CreatTime, &nodeInfo.UpdateTime); err != nil {
+			return nil, err
+		}
+		nodeList = append(nodeList, &nodeInfo)
+	}
+	return nodeList, nil
+}
+
 func (mysql *MysqlConfig) GetUser(name string) (userInfo *User, err error) {
 	userInfo = new(User)
 	if mysql.MysqlConn == nil {
