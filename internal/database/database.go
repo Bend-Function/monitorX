@@ -26,7 +26,7 @@ func GetConfig() *MysqlConfig {
 	return Config
 }
 
-func (mysqlConf *MysqlConfig) GetNodeInfo(nodeID uint) (nodeInfo *NodeInfo, err error) {
+func (mysqlConf *MysqlConfig) GetNodeInfo(nodeID int) (nodeInfo *NodeInfo, err error) {
 	nodeInfo = new(NodeInfo)
 	if mysqlConf.MysqlConn == nil {
 		err = mysqlConf.GetDB()
@@ -63,4 +63,30 @@ func (mysqlConf *MysqlConfig) GetUser(name string) (userInfo *User, err error) {
 	mysqlConf.MysqlConn.Find(&userInfo, "user_name=?", name)
 
 	return userInfo, nil
+}
+
+func (mysqlConf *MysqlConfig) CheckNodePassword(nodeID int, password string) (status bool, err error) {
+	nodeInfo, err := mysqlConf.GetNodeInfo(nodeID)
+	if err != nil {
+		return false, err
+	}
+
+	if nodeInfo.Password == password {
+		return true, nil
+	} else {
+		return false, nil
+	}
+
+}
+
+func (mysqlConf *MysqlConfig) InsertNodeData(nodeData *NodeData) (err error) {
+	if mysqlConf.MysqlConn == nil {
+		err = mysqlConf.GetDB()
+		if err != nil {
+			return err
+		}
+	}
+
+	mysqlConf.MysqlConn.Create(&nodeData)
+	return nil
 }

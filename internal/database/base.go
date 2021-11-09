@@ -24,14 +24,14 @@ type MysqlConfig struct {
 //}
 
 type User struct {
-	ID         int       `gorm:"column:id" json:"id"`
-	UserName   string    `gorm:"column:user_name" json:"user_name"`
-	Password   string    `gorm:"column:passwd" json:"password"`
-	Email      string    `gorm:"column:email" json:"email"`
-	Balance    string    `gorm:"column:balance" json:"balance"`
-	GroupID    int       `gorm:"column:group_id" json:"group_id"` // 1 - means admin; > 1 means user
-	CreateTime time.Time `gorm:"column:create_time" json:"create_time"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"update_time"`
+	ID       int    `gorm:"column:id" json:"id"`
+	UserName string `gorm:"column:user_name" json:"user_name"`
+	Password string `gorm:"column:passwd" json:"password"`
+	Email    string `gorm:"column:email" json:"email"`
+	Balance  string `gorm:"column:balance" json:"balance"`
+	GroupID  int    `gorm:"column:group_id" json:"group_id"` // 1 - means admin; > 1 means user
+	//CreateTime time.Time `gorm:"column:create_time" json:"create_time"`
+	//UpdateTime time.Time `gorm:"column:update_time" json:"update_time"`
 }
 
 type UserGroup struct {
@@ -96,16 +96,16 @@ type NodeInfo struct {
 //}
 
 type NodeData struct {
-	ID               int       `gorm:"column:id" json:"id"`
-	NodeID           int       `gorm:"column:node_id" json:"node_id"`
-	CpuUsage         string    `gorm:"column:cpu_usage" json:"cpu_usage"`
-	MemoryUsage      string    `gorm:"column:memory_usage" json:"memory_usage"`
-	DiskUsage        string    `gorm:"column:disk_usage" json:"disk_usage"`
-	NetworkUpSpeed   string    `gorm:"column:network_up_speed" json:"network_up_speed"`
-	NetworkDownSpeed string    `gorm:"column:network_down_speed" json:"network_down_speed"`
-	PingDelay        string    `gorm:"column:ping_delay" json:"ping_delay"`
-	Connections      string    `gorm:"column:connections" json:"connections"`
-	UpdateTime       time.Time `gorm:"column:update_time" json:"update_time"`
+	ID               int    `gorm:"column:id" json:"id"`
+	NodeID           int    `gorm:"column:node_id" json:"node_id" form:"node_id" binding:"required"`
+	CpuUsage         string `gorm:"column:cpu_usage" json:"cpu_usage" form:"cpu_usage" binding:"required"`
+	MemoryUsage      string `gorm:"column:memory_usage" json:"memory_usage" form:"memory_usage" binding:"required"`
+	DiskUsage        string `gorm:"column:disk_usage" json:"disk_usage" form:"disk_usage" binding:"required"`
+	NetworkUpSpeed   string `gorm:"column:network_up_speed" json:"network_up_speed" form:"network_up_speed" binding:"required"`
+	NetworkDownSpeed string `gorm:"column:network_down_speed" json:"network_down_speed" form:"network_down_speed" binding:"required"`
+	PingDelay        string `gorm:"column:ping_delay" json:"ping_delay" form:"ping_delay" binding:"required"`
+	Connections      string `gorm:"column:connections" json:"connections" form:"connections" binding:"required"`
+	//UpdateTime       time.Time `gorm:"column:update_time" json:"update_time"`
 }
 
 type NodeGroup struct {

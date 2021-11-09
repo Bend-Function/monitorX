@@ -4,9 +4,26 @@ import (
 	"fmt"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"log"
+	"monitorX/internal/database"
 	"monitorX/internal/web/controller"
 	"net/http"
 )
+
+func nodeRouter(router *gin.Engine) {
+	node := router.Group("/node")
+	{
+		node.POST("/update/data", func(c *gin.Context) {
+			var nodeData database.NodeData
+			err = c.Bind(&nodeData)
+			nodePassword := c.Query("password")
+			if err != nil {
+				c.JSON(http.StatusBadRequest, err)
+			}
+			c.JSON(200, controller.UpdateData(&nodeData, nodePassword))
+		})
+	}
+}
 
 func userRouter(router *gin.Engine) {
 	user := router.Group("/user")
@@ -34,7 +51,11 @@ func Start(host string, port, timeout int) {
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	pingRouter(router)
+	nodeRouter(router)
 	router.Use(Auth(router, timeout).MiddlewareFunc())
 	userRouter(router)
-	router.Run(fmt.Sprintf("%s:%d", host, port))
+	err = router.Run(fmt.Sprintf("%s:%d", host, port))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
