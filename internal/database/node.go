@@ -38,7 +38,7 @@ func (mysqlConf *MysqlConfig) InsertNodeData(nodeData *NodeData) (err error) {
 	return nil
 }
 
-func (mysqlConf *MysqlConfig) GetNodeData(nodeID int) (dataList *[]NodeData, err error) {
+func (mysqlConf *MysqlConfig) GetNodeData(nodeID int, timePeriod string) (dataList *[]NodeData, err error) {
 	dataList = new([]NodeData)
 	if mysqlConf.MysqlConn == nil {
 		err = mysqlConf.GetDB()
@@ -46,7 +46,17 @@ func (mysqlConf *MysqlConfig) GetNodeData(nodeID int) (dataList *[]NodeData, err
 			return nil, err
 		}
 	}
-	mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ?", nodeID).Scan(&dataList)
+	switch timePeriod {
+	case "today":
+		mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ? AND to_days(`node_data`.update_time) = to_days(now())", nodeID).Scan(&dataList)
+	case "yesterday":
+		mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ? AND to_days(NOW()) - TO_DAYS(`node_data`.update_time) = 1", nodeID).Scan(&dataList)
+	case "weekly":
+		mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ? AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(`node_data`.update_time)", nodeID).Scan(&dataList)
+	case "monthly":
+		mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ? AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(`node_data`.update_time)", nodeID).Scan(&dataList)
+	}
+	//mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ?", nodeID).Scan(&dataList)
 
 	return dataList, nil
 }

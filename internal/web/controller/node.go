@@ -10,12 +10,12 @@ func UpdateData(data *database.NodeData, password string) *ResponseBody {
 	mysqlConf := database.GetConfig()
 	passwordStatus, err := mysqlConf.CheckNodePassword(data.NodeID, password)
 	if err != nil {
-		return returnMysqlError(err)
+		return returnServerError(err)
 	}
 	if passwordStatus {
 		err = mysqlConf.InsertNodeData(data)
 		if err != nil {
-			return returnMysqlError(err)
+			return returnServerError(err)
 		} else {
 			responseBody.Msg = "Update success!"
 		}
@@ -24,19 +24,19 @@ func UpdateData(data *database.NodeData, password string) *ResponseBody {
 	return &responseBody
 }
 
-func QueryNodeData(nodeID int, userName string) *ResponseBody {
+func QueryNodeData(nodeID int, userName string, timePeriod string) *ResponseBody {
 	responseBody := ResponseBody{code: http.StatusOK}
 	mysqlConf := database.GetConfig()
 	checkStatus, err := mysqlConf.CheckNodeOwner(nodeID, userName)
 	if err != nil {
-		return returnMysqlError(err)
+		return returnServerError(err)
 	}
 	if checkStatus == false {
-		return returnMysqlError(err)
+		return returnServerError(err)
 	} else {
-		nodeData, err := mysqlConf.GetNodeData(nodeID)
+		nodeData, err := mysqlConf.GetNodeData(nodeID, timePeriod)
 		if err != nil {
-			return returnMysqlError(err)
+			return returnServerError(err)
 		}
 		responseBody.Data = nodeData
 	}

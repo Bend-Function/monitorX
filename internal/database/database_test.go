@@ -96,7 +96,7 @@ func TestQueryNodeData(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	nodeData, err := mysqlConf.GetNodeData(1)
+	nodeData, err := mysqlConf.GetNodeData(1, "yesterday")
 	if err != nil {
 		fmt.Println(err)
 	}

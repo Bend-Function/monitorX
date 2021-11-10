@@ -37,13 +37,14 @@ func userRouter(router *gin.Engine) {
 			requestUser := RequestUsername(c)
 			c.JSON(200, controller.UserNode(requestUser))
 		})
-		user.GET("/node/data/:id", func(c *gin.Context) {
+		user.GET("/node/data/:id/:time_period", func(c *gin.Context) {
 			requestUser := RequestUsername(c)
 			nodeID, err := strconv.Atoi(c.Param("id"))
+			timePeriod := c.Param("time_period")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, "id is not int")
 			}
-			c.JSON(200, controller.QueryNodeData(nodeID, requestUser))
+			c.JSON(200, controller.QueryNodeData(nodeID, requestUser, timePeriod))
 		})
 	}
 }

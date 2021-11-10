@@ -8,7 +8,7 @@ type ResponseBody struct {
 	Msg  string
 }
 
-func returnMysqlError(err error) (responseBody *ResponseBody) {
+func returnServerError(err error) (responseBody *ResponseBody) {
 	responseBody.code = http.StatusInternalServerError
 	responseBody.Msg = err.Error()
 	return responseBody
