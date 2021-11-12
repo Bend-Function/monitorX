@@ -1,14 +1,17 @@
 package database
 
+import "errors"
+
 func (mysqlConf *MysqlConfig) GetNodeInfo(nodeID int) (nodeInfo *NodeInfo, err error) {
 	nodeInfo = new(NodeInfo)
-	if mysqlConf.MysqlConn == nil {
-		err = mysqlConf.GetDB()
-		if err != nil {
-			return nil, err
-		}
+	if mysqlConf.checkMysqlConnection() != nil {
+		err = errors.New("mysql connection error")
+		return
 	}
-	mysqlConf.MysqlConn.Find(&nodeInfo, "id=?", nodeID)
+	mysqlConf.MysqlConn.Find(nodeInfo, "id=?", nodeID)
+	if nodeInfo.ID != nodeID {
+		return nil, errors.New("can't find node")
+	}
 	return nodeInfo, nil
 }
 
@@ -26,25 +29,44 @@ func (mysqlConf *MysqlConfig) CheckNodePassword(nodeID int, password string) (st
 
 }
 
-func (mysqlConf *MysqlConfig) InsertNodeData(nodeData *NodeData) (err error) {
-	if mysqlConf.MysqlConn == nil {
-		err = mysqlConf.GetDB()
-		if err != nil {
-			return err
-		}
+func (mysqlConf *MysqlConfig) CreateNodeData(nodeData *NodeData) (err error) {
+	if mysqlConf.checkMysqlConnection() != nil {
+		err = errors.New("mysql connection error")
+		return
 	}
 
-	mysqlConf.MysqlConn.Create(&nodeData)
+	//mysqlConf.MysqlConn.Create(&nodeData)
+	mysqlConf.MysqlConn.Omit("ID", "UpdateTime").Create(&nodeData)
 	return nil
+
+}
+
+func (mysqlConf *MysqlConfig) CreateNodeInfo(nodeInfo *NodeInfo) (err error) {
+	if mysqlConf.checkMysqlConnection() != nil {
+		err = errors.New("mysql connection error")
+		return
+	}
+	return
+}
+
+func (mysqlConf *MysqlConfig) GetNodeGroup(nodeGroupID int) (nodeGroup *NodeGroup, err error) {
+	nodeGroup = new(NodeGroup)
+	if mysqlConf.checkMysqlConnection() != nil {
+		err = errors.New("mysql connection error")
+		return
+	}
+
+	mysqlConf.MysqlConn.Find(&nodeGroup, "id=?", nodeGroupID)
+
+	return
+
 }
 
 func (mysqlConf *MysqlConfig) GetNodeData(nodeID int, timePeriod string) (dataList *[]NodeData, err error) {
 	dataList = new([]NodeData)
-	if mysqlConf.MysqlConn == nil {
-		err = mysqlConf.GetDB()
-		if err != nil {
-			return nil, err
-		}
+	if mysqlConf.checkMysqlConnection() != nil {
+		err = errors.New("mysql connection error")
+		return
 	}
 	switch timePeriod {
 	case "today":
@@ -55,6 +77,9 @@ func (mysqlConf *MysqlConfig) GetNodeData(nodeID int, timePeriod string) (dataLi
 		mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ? AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(`node_data`.update_time)", nodeID).Scan(&dataList)
 	case "monthly":
 		mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ? AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(`node_data`.update_time)", nodeID).Scan(&dataList)
+	default:
+		// Today
+		mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ? AND to_days(`node_data`.update_time) = to_days(now())", nodeID).Scan(&dataList)
 	}
 	//mysqlConf.MysqlConn.Table("node_data").Select("*").Joins("INNER JOIN `node_info` ON node_info.id = `node_data`.node_id WHERE `node_data`.node_id = ?", nodeID).Scan(&dataList)
 

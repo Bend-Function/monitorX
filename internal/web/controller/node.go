@@ -13,7 +13,7 @@ func UpdateData(data *database.NodeData, password string) *ResponseBody {
 		return returnServerError(err)
 	}
 	if passwordStatus {
-		err = mysqlConf.InsertNodeData(data)
+		err = mysqlConf.CreateNodeData(data)
 		if err != nil {
 			return returnServerError(err)
 		} else {

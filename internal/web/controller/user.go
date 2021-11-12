@@ -31,3 +31,24 @@ func UserNode(requestUserName string) *ResponseBody {
 	responseBody.Data = nodeList
 	return &responseBody
 }
+
+func CreateUser(newUser *database.User) *ResponseBody {
+	responseBody := ResponseBody{code: http.StatusOK}
+	mysqlConf := database.GetConfig()
+
+	checkUserName, err := mysqlConf.GetUser(newUser.UserName)
+	if err != nil {
+		return returnServerError(err)
+	}
+	if checkUserName.ID == 0 {
+		responseBody.code = http.StatusBadRequest
+		responseBody.Msg = "Already has same user name"
+		return &responseBody
+	}
+	err = mysqlConf.CreateUser(newUser)
+	if err != nil {
+		return returnServerError(err)
+	}
+
+	return &responseBody
+}

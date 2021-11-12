@@ -24,14 +24,14 @@ type MysqlConfig struct {
 //}
 
 type User struct {
-	ID       int    `gorm:"column:id" json:"id"`
-	UserName string `gorm:"column:user_name" json:"user_name"`
-	Password string `gorm:"column:passwd" json:"password"`
-	Email    string `gorm:"column:email" json:"email"`
-	Balance  string `gorm:"column:balance" json:"balance"`
-	GroupID  int    `gorm:"column:group_id" json:"group_id"` // 1 - means admin; > 1 means user
-	//CreateTime time.Time `gorm:"column:create_time" json:"create_time"`
-	//UpdateTime time.Time `gorm:"column:update_time" json:"update_time"`
+	ID         int       `gorm:"column:id" json:"id"`
+	UserName   string    `gorm:"column:user_name" json:"user_name" form:"user_name"`
+	Password   string    `gorm:"column:passwd" json:"password" form:"password"`
+	Email      string    `gorm:"column:email" json:"email" form:"email"`
+	Balance    string    `gorm:"column:balance" json:"balance"`
+	GroupID    int       `gorm:"column:group_id" json:"group_id" form:"group_id"` // 1 - means admin; > 1 means user
+	CreateTime time.Time `gorm:"column:create_time" json:"create_time"`
+	UpdateTime time.Time `gorm:"column:update_time" json:"update_time"`
 }
 
 type UserGroup struct {
@@ -134,4 +134,14 @@ func (NodeData) TableName() string {
 }
 func (NodeGroup) TableName() string {
 	return "node_group"
+}
+
+func (mysqlConf *MysqlConfig) checkMysqlConnection() (err error) {
+	if mysqlConf.MysqlConn == nil {
+		err = mysqlConf.GetDB()
+		if err != nil {
+			return err
+		}
+	}
+	return
 }

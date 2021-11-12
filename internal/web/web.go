@@ -29,9 +29,16 @@ func nodeRouter(router *gin.Engine) {
 func userRouter(router *gin.Engine) {
 	user := router.Group("/user")
 	{
-		user.GET("/info", func(c *gin.Context) {
+		user.GET("", func(c *gin.Context) {
 			requestUser := RequestUsername(c)
 			c.JSON(200, controller.UserInfo(requestUser))
+		})
+		user.POST("", func(c *gin.Context) {
+			var newUser *database.User
+			err := c.Bind(&newUser)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, err)
+			}
 		})
 		user.GET("/node/list", func(c *gin.Context) {
 			requestUser := RequestUsername(c)

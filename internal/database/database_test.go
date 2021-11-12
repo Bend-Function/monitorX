@@ -21,7 +21,7 @@ func TestQueryUser(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	userInfo, err := mysqlConf.GetUser("t2")
+	userInfo, err := mysqlConf.GetUser("t211")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -33,7 +33,7 @@ func TestQueryNodeInfo(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	userInfo, err := mysqlConf.GetNodeInfo(2)
+	userInfo, err := mysqlConf.GetNodeInfo(1)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -67,7 +67,7 @@ func TestInsertNodeData(t *testing.T) {
 		PingDelay:        "222",
 		Connections:      "222",
 	}
-	err = mysqlConf.InsertNodeData(nodeData)
+	err = mysqlConf.CreateNodeData(nodeData)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -101,4 +101,22 @@ func TestQueryNodeData(t *testing.T) {
 		fmt.Println(err)
 	}
 	fmt.Println(nodeData)
+}
+
+func TestCreateUser(t *testing.T) {
+	var newUser = &User{
+		UserName: "t31",
+		Password: "1234",
+		Email:    "1@q.cn",
+		Balance:  "3",
+		GroupID:  1,
+	}
+	err := mysqlConf.GetDB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = mysqlConf.CreateUser(newUser)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
