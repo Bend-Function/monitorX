@@ -41,11 +41,23 @@ func (mysqlConf *MysqlConfig) CreateNodeData(nodeData *NodeData) (err error) {
 
 }
 
-func (mysqlConf *MysqlConfig) CreateNodeInfo(nodeInfo *NodeInfo) (err error) {
+func (mysqlConf *MysqlConfig) CreateNodeInfo(newNode *NodeInfo) (err error) {
 	if mysqlConf.checkMysqlConnection() != nil {
 		err = errors.New("mysql connection error")
 		return
 	}
+	newNode.IsInfoExpired = 1
+	mysqlConf.MysqlConn.Omit("ID", "CreateTime", "UpdateTime").Create(&newNode)
+	return
+}
+
+func (mysqlConf *MysqlConfig) UpdateNodeInfo(newNode *NodeInfo) (err error) {
+	if mysqlConf.checkMysqlConnection() != nil {
+		err = errors.New("mysql connection error")
+		return
+	}
+	//db.Model(&User{}).Where("1 = 1").Update("name", "jinzhu")
+	mysqlConf.MysqlConn.Omit("ID", "Password", "GroupID", "UpdateFrequency", "CreateTime", "UpdateTime").Updates(&newNode)
 	return
 }
 

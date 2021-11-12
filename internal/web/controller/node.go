@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func UpdateData(data *database.NodeData, password string) *ResponseBody {
+func CreateData(data *database.NodeData, password string) *ResponseBody {
 	responseBody := ResponseBody{code: http.StatusOK}
 	mysqlConf := database.GetConfig()
 	passwordStatus, err := mysqlConf.CheckNodePassword(data.NodeID, password)
@@ -24,7 +24,7 @@ func UpdateData(data *database.NodeData, password string) *ResponseBody {
 	return &responseBody
 }
 
-func QueryNodeData(nodeID int, userName string, timePeriod string) *ResponseBody {
+func GetNodeData(nodeID int, userName string, timePeriod string) *ResponseBody {
 	responseBody := ResponseBody{code: http.StatusOK}
 	mysqlConf := database.GetConfig()
 	checkStatus, err := mysqlConf.CheckNodeOwner(nodeID, userName)
@@ -40,5 +40,25 @@ func QueryNodeData(nodeID int, userName string, timePeriod string) *ResponseBody
 		}
 		responseBody.Data = nodeData
 	}
+	return &responseBody
+}
+
+func CreateNodeInfo(newNode *database.NodeInfo, userName string) *ResponseBody {
+	responseBody := ResponseBody{code: http.StatusOK}
+	mysqlConf := database.GetConfig()
+	if newNode.OwnedUserID == 0 {
+		userInfo, err := mysqlConf.GetUser(userName)
+		if err != nil {
+			return returnServerError(err)
+		}
+
+		newNode.OwnedUserID = userInfo.ID
+	}
+
+	err := mysqlConf.CreateNodeInfo(newNode)
+	if err != nil {
+		return returnServerError(err)
+	}
+
 	return &responseBody
 }

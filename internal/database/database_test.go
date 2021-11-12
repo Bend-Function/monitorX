@@ -37,6 +37,12 @@ func TestQueryNodeInfo(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	b, err := json.Marshal(userInfo)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
 	fmt.Println(userInfo)
 }
 

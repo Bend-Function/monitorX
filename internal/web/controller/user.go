@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func UserInfo(requestUserName string) *ResponseBody {
+func GetUserInfo(requestUserName string) *ResponseBody {
 	responseBody := ResponseBody{code: http.StatusOK}
 	mysqlConf := database.GetConfig()
 	userInfo, err := mysqlConf.GetUser(requestUserName)
@@ -19,7 +19,7 @@ func UserInfo(requestUserName string) *ResponseBody {
 	return &responseBody
 }
 
-func UserNode(requestUserName string) *ResponseBody {
+func GetUserNodeList(requestUserName string) *ResponseBody {
 	responseBody := ResponseBody{code: http.StatusOK}
 	mysqlConf := database.GetConfig()
 	nodeList, err := mysqlConf.GetUserNode(requestUserName)

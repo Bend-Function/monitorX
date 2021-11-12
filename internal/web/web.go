@@ -11,17 +11,32 @@ import (
 	"strconv"
 )
 
-func nodeRouter(router *gin.Engine) {
+func nodeDataRouter(router *gin.Engine) {
 	node := router.Group("/node")
 	{
-		node.POST("/update/data", func(c *gin.Context) {
+		node.POST("/data", func(c *gin.Context) {
 			var nodeData database.NodeData
 			err = c.Bind(&nodeData)
 			nodePassword := c.Query("password")
 			if err != nil {
 				c.JSON(http.StatusBadRequest, err)
 			}
-			c.JSON(200, controller.UpdateData(&nodeData, nodePassword))
+			c.JSON(200, controller.CreateData(&nodeData, nodePassword))
+		})
+	}
+}
+
+func nodeInfoRouter(router *gin.Engine) {
+	node := router.Group("/node")
+	{
+		node.POST("/info", func(c *gin.Context) {
+			var nodeInfo database.NodeInfo
+			userName := RequestUsername(c)
+			err = c.Bind(&nodeInfo)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, err)
+			}
+			c.JSON(200, controller.CreateNodeInfo(&nodeInfo, userName))
 		})
 	}
 }
@@ -31,7 +46,7 @@ func userRouter(router *gin.Engine) {
 	{
 		user.GET("", func(c *gin.Context) {
 			requestUser := RequestUsername(c)
-			c.JSON(200, controller.UserInfo(requestUser))
+			c.JSON(200, controller.GetUserInfo(requestUser))
 		})
 		user.POST("", func(c *gin.Context) {
 			var newUser *database.User
@@ -42,7 +57,7 @@ func userRouter(router *gin.Engine) {
 		})
 		user.GET("/node/list", func(c *gin.Context) {
 			requestUser := RequestUsername(c)
-			c.JSON(200, controller.UserNode(requestUser))
+			c.JSON(200, controller.GetUserNodeList(requestUser))
 		})
 		user.GET("/node/data/:id/:time_period", func(c *gin.Context) {
 			requestUser := RequestUsername(c)
@@ -51,7 +66,7 @@ func userRouter(router *gin.Engine) {
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, "id is not int")
 			}
-			c.JSON(200, controller.QueryNodeData(nodeID, requestUser, timePeriod))
+			c.JSON(200, controller.GetNodeData(nodeID, requestUser, timePeriod))
 		})
 	}
 }
@@ -68,9 +83,10 @@ func Start(host string, port, timeout int) {
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	pingRouter(router)
-	nodeRouter(router)
+	nodeDataRouter(router)
 	router.Use(Auth(router, timeout).MiddlewareFunc())
 	userRouter(router)
+	nodeInfoRouter(router)
 	err = router.Run(fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		log.Fatal(err)
