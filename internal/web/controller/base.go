@@ -1,6 +1,9 @@
 package controller
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 type ResponseBody struct {
 	code uint
@@ -10,6 +13,6 @@ type ResponseBody struct {
 
 func returnServerError(err error) (responseBody *ResponseBody) {
 	responseBody.code = http.StatusInternalServerError
-	responseBody.Msg = err.Error()
+	responseBody.Msg = fmt.Sprintf("mysql server error %v", err.Error())
 	return responseBody
 }

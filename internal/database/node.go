@@ -47,7 +47,8 @@ func (mysqlConf *MysqlConfig) CreateNodeInfo(newNode *NodeInfo) (err error) {
 		return
 	}
 	newNode.IsInfoExpired = 1
-	mysqlConf.MysqlConn.Omit("ID", "CreateTime", "UpdateTime").Create(&newNode)
+	mysqlConf.MysqlConn.Select("NodeName", "Password", "GroupID", "OwnedUserID", "IsInfoExpired").Create(&newNode)
+
 	return
 }
 
@@ -57,7 +58,8 @@ func (mysqlConf *MysqlConfig) UpdateNodeInfo(newNode *NodeInfo) (err error) {
 		return
 	}
 	//db.Model(&User{}).Where("1 = 1").Update("name", "jinzhu")
-	mysqlConf.MysqlConn.Omit("ID", "Password", "GroupID", "UpdateFrequency", "CreateTime", "UpdateTime").Updates(&newNode)
+	newNode.IsInfoExpired = 0
+	mysqlConf.MysqlConn.Where("id = ?", newNode.ID).Select("*").Omit("ID", "NodeName", "Password", "GroupID", "OwnedUserID", "UpdateFrequency", "CreateTime", "UpdateTime").Updates(&newNode)
 	return
 }
 

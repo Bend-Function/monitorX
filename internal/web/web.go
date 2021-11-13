@@ -23,6 +23,14 @@ func nodeDataRouter(router *gin.Engine) {
 			}
 			c.JSON(200, controller.CreateData(&nodeData, nodePassword))
 		})
+		node.POST("/info/detail", func(c *gin.Context) {
+			var nodeDetail database.NodeInfo
+			err = c.Bind(&nodeDetail)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, err)
+			}
+			c.JSON(200, controller.UpdateNodeInfo(&nodeDetail))
+		})
 	}
 }
 
@@ -31,7 +39,8 @@ func nodeInfoRouter(router *gin.Engine) {
 	{
 		node.POST("/info", func(c *gin.Context) {
 			var nodeInfo database.NodeInfo
-			userName := RequestUsername(c)
+			//userName := RequestUsername(c)
+			userName := "func"
 			err = c.Bind(&nodeInfo)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, err)
@@ -84,9 +93,10 @@ func Start(host string, port, timeout int) {
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	pingRouter(router)
 	nodeDataRouter(router)
+	nodeInfoRouter(router)
 	router.Use(Auth(router, timeout).MiddlewareFunc())
 	userRouter(router)
-	nodeInfoRouter(router)
+
 	err = router.Run(fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		log.Fatal(err)

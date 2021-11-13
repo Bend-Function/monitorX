@@ -19,6 +19,8 @@ func CreateData(data *database.NodeData, password string) *ResponseBody {
 		} else {
 			responseBody.Msg = "Update success!"
 		}
+	} else {
+		responseBody.Msg = "Password error!"
 	}
 
 	return &responseBody
@@ -58,6 +60,22 @@ func CreateNodeInfo(newNode *database.NodeInfo, userName string) *ResponseBody {
 	err := mysqlConf.CreateNodeInfo(newNode)
 	if err != nil {
 		return returnServerError(err)
+	} else {
+		responseBody.Msg = "Node created successfully"
+	}
+
+	return &responseBody
+}
+
+func UpdateNodeInfo(node *database.NodeInfo) *ResponseBody {
+	responseBody := ResponseBody{code: http.StatusOK}
+	mysqlConf := database.GetConfig()
+
+	err := mysqlConf.UpdateNodeInfo(node)
+	if err != nil {
+		return returnServerError(err)
+	} else {
+		responseBody.Msg = "Node update successfully"
 	}
 
 	return &responseBody

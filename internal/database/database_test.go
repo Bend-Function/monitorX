@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 )
 
 var (
@@ -70,8 +71,8 @@ func TestInsertNodeData(t *testing.T) {
 		DiskUsage:        "32",
 		NetworkUpSpeed:   "4",
 		NetworkDownSpeed: "5",
-		PingDelay:        "222",
-		Connections:      "222",
+		//PingDelay:        "222",
+		Connections: "222",
 	}
 	err = mysqlConf.CreateNodeData(nodeData)
 	if err != nil {
@@ -122,6 +123,29 @@ func TestCreateUser(t *testing.T) {
 		fmt.Println(err)
 	}
 	err = mysqlConf.CreateUser(newUser)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func TestUpdateNodeInfo(t *testing.T) {
+	var nodeInfo = &NodeInfo{
+		ID:             6,
+		NodeSystem:     "C",
+		CoreVersion:    "C",
+		CpuType:        "A",
+		MemorySize:     "A",
+		DiskSize:       "A",
+		StartupTime:    time.Now(),
+		NetworkUpSum:   "A",
+		NetworkDownSum: "A",
+		IsInfoExpired:  0,
+	}
+	err := mysqlConf.GetDB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = mysqlConf.UpdateNodeInfo(nodeInfo)
 	if err != nil {
 		fmt.Println(err)
 	}
